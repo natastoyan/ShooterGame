@@ -51,7 +51,7 @@ class StaticSprite:
 
     def update(self):
         self.get_sprite()
-        pg.draw.circle(self.game.screen, 'red', (self.x * 10, self.y * 10), 3)
+        pg.draw.circle(self.game.screen, 'blue', (self.x * 10, self.y * 10), 3)
 
 
 class AnimatedSprite(StaticSprite):
@@ -87,6 +87,7 @@ class AnimatedSprite(StaticSprite):
             # print(f"{time_now} - {self.animation_time_prev} = {time_now - self.animation_time_prev}")
             self.animation_time_prev = time_now
             self.animation_trigger = True
+            
     def get_images(self, path):
         # images = []
         images = deque()

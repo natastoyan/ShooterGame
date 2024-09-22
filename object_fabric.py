@@ -9,6 +9,7 @@ class ObjectFabric:
         # self.static_sprite_path = 'resources/static_sprites/'
         # self.animated_sprite_path = 'resources/animated_sprites/'
         add_sprite = self.add_sprite
+        self.npc_positions = {}
 
         #sprite map
         #self.add_sprite(StaticSprite(game))
@@ -29,10 +30,13 @@ class ObjectFabric:
 
         # npc map
         self.add_npc(Npc(game))
+        self.add_npc(Npc(game=game, pos=(1.5, 7.5)))
 
     def update(self):
+        self.npc_positions = [npc.map_pos for npc in self.npc_list]
         [sprite.update() for sprite in self.sprite_list]
         [npc.update() for npc in self.npc_list]
+        [self.npc_list.remove(npc) for npc in self.npc_list if npc.to_delete]
 
     def add_npc(self, npc):
         self.npc_list.append(npc)

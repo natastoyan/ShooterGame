@@ -14,6 +14,8 @@ class Player:
         self.sin_a = math.sin(self.angle)
         self.cos_a = math.cos(self.angle)
         self.dx, self.dy = 0, 0
+        
+        self.health = 100
 
     def single_fire_event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -21,6 +23,10 @@ class Player:
                 self.game.sound.shotgun.play()
                 self.shot = True
                 self.game.weapon.reloading = True
+
+    def get_damage(self, damage):
+        self.health -= damage
+        self.game.sound.player_pain.play()
 
     def movement(self):
         self.sin_a = math.sin(self.angle)
@@ -79,6 +85,7 @@ class Player:
                      (self.x * 100 * WIDTH * math.cos(self.angle),
                       self.y * 100 * WIDTH * math.sin(self.angle)), 2)
         pg.draw.circle(self.game.screen, 'green', (self.x * 100, self.y * 100), 6)
+    
     def mouse_control(self):
         mx, my = pg.mouse.get_pos()
         if mx < MOUSE_BORDER_LEFT or mx > MOUSE_BORDER_RIGHT:

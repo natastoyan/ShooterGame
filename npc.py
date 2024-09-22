@@ -1,5 +1,5 @@
 import math
-
+import datetime
 from sprite_object import *
 from random import randint, random, choice
 from pathfinding import *
@@ -22,14 +22,17 @@ class Npc(AnimatedSprite):
         self.health = 100
         self.attack_damage = 10
         self.accuracy = 0.15
+        self.attack_dist = randint(3, 6)
+
         self.alive = True
         self.pain = False
         self.ray_cast_value = False
         self.frame_counter = 0
         self.player_search_trigger = False
+        self.to_delete = False
+        self.killed_time = None
 
     def update(self):
-        print(self.theta)
         self.check_animation_time()
         self.get_sprite()
         self.run_logic()
@@ -37,7 +40,7 @@ class Npc(AnimatedSprite):
         self.draw_ray_cast()
 
     def movement(self):
-       # next_pos = self.game.player.map_pos
+        # next_pos = self.game.player.map_pos
         next_pos = self.game.pathfinding.get_path(self.map_pos, self.game.player.map_pos)
         next_x, next_y = next_pos
 
@@ -61,6 +64,9 @@ class Npc(AnimatedSprite):
         if self.animation_trigger:
             self.pain = False
 
+    def animate_attack(self):
+        self.animate(self.attack_images)
+
     def animate_death(self):
         if not self.alive:
             # if self.game.global_trigger and self.frame_counter < len(self.death_images) - 1:
@@ -68,6 +74,13 @@ class Npc(AnimatedSprite):
                 self.image = self.death_images[0]
                 self.death_images.rotate(-1)
                 self.frame_counter += 1
+
+    def attack(self):
+        if self.animation_trigger:
+            self.animate_attack()
+            self.game.sound.npc_shot.play()
+            if random() < self.accuracy:
+                self.game.player.get_damage(self.attack_damage)
 
     def check_if_hit(self):
         if self.see_player and self.game.player.shot:
@@ -82,6 +95,7 @@ class Npc(AnimatedSprite):
         if self.health < 1:
             self.alive = False
             self.game.sound.npc_pain.play()
+            self.killed_time = datetime.datetime.now()
 
     def check_if_in_center(self):
         return HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width
@@ -94,8 +108,11 @@ class Npc(AnimatedSprite):
                 self.animate_pain()
             elif self.see_player:
                 self.player_search_trigger = True
-                self.animate(self.walk_images)
-                self.movement()
+                if self.dist < self.attack_dist:
+                    self.attack()
+                else:
+                    self.animate(self.walk_images)
+                    self.movement()
             elif self.player_search_trigger:
                 self.animate(self.walk_images)
                 self.movement()
@@ -103,6 +120,8 @@ class Npc(AnimatedSprite):
                 self.animate(self.idle_images)
         else:
             self.animate_death()
+            if datetime.datetime.now() - self.killed_time > datetime.timedelta(seconds=10):
+                self.to_delete = True
 
     @property
     def map_pos(self):
@@ -173,7 +192,7 @@ class Npc(AnimatedSprite):
         return False
 
     def draw_ray_cast(self):
-        pg.draw.circle(self.game.screen, 'red', (100 * self.x, 100 * self.y), 15)
+        pg.draw.circle(self.game.screen, 'red', (10 * self.x, 10 * self.y), 3)
         if self.check_if_seen_by_player():
-            pg.draw.line(self.game.screen, 'orange', (100 * self.game.player.x, 100 * self.game.player.y),
-                         (100 * self.x, 100 * self.y), 2)
+            pg.draw.line(self.game.screen, 'orange', (10 * self.game.player.x, 10 * self.game.player.y),
+                         (10 * self.x, 10 * self.y), 2)

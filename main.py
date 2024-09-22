@@ -20,6 +20,7 @@ class Game:
         self.global_trigger = False
         self.global_event = pg.USEREVENT + 0
         pg.time.set_timer(self.global_event, 40)
+        self.show_map = False
         self.new_game()
 
     def new_game(self):
@@ -28,8 +29,6 @@ class Game:
         self.log = Log(self)
         self.object_renderer = ObjectRenderer(self)
         self.raycasting = RayCasting(self)
-        # self.static_sprite = StaticSprite(self)
-        # self.animated_sprite = AnimatedSprite(self)
         self.object_fabric = ObjectFabric(self)
         self.weapon = Weapon(self)
         self.sound = Sound(self)
@@ -48,18 +47,23 @@ class Game:
         pg.display.set_caption(f'{self.clock.get_fps() : .1f}')
 
     def draw(self):
-        self.screen.fill('black')
-        self.map.draw()
-        self.player.draw()
+        # self.screen.fill('black')
+        # self.map.draw()
+        # self.player.draw()
 
-        # self.object_renderer.draw()
-        # self.weapon.draw()
-        # self.log.draw()
-        # self.map.draw_mini()
-        # self.player.draw_mini()
+        self.object_renderer.draw()
+        self.weapon.draw()
+        self.log.draw()
+        self.map.draw_mini()
+        self.player.draw_mini()
+        if self.show_map:
+            self.map.draw()
 
     def check_events(self):
         for event in pg.event.get():
+            keys = pg.key.get_pressed()
+            if keys[pg.K_m]:
+                self.show_map = not self.show_map
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
